@@ -481,26 +481,81 @@ export default function App() {
   const addProduct = (p) => setProducts((prev) => [p, ...prev]);
   const deleteProduct = (id) => setProducts((prev) => prev.filter((x) => x.id !== id));
 
-  const printLabel = (product) => {
-    const html = `<!doctype html>
+const printLabel = (product) => {
+  const html = `<!doctype html>
 <html>
 <head>
   <meta charset="utf-8" />
   <title>Label</title>
-  <style>body{font-family:Arial;margin:6px;color:#000}.c{text-align:center}</style>
+  <style>
+    @page {
+      size: 8.3cm 3.5cm landscape; /* match sticker row size */
+      margin: 0;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      width: 8.3cm;
+      height: 3.5cm;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+    .label {
+      margin-left: 0px;
+      font-size: 16px;
+      width: 3.85cm;   /* each sticker width */
+      height: 3.5cm;   /* full row height */
+
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+    }
+    .label div {
+      font-weight: bold;
+      margin-bottom: 2px;
+      margin-right: 8px;
+    }
+    svg {
+      width: 100%;
+      height: 1.2cm;
+      fornt-size: 25px !important;
+    }
+  </style>
 </head>
 <body>
-  <div class="c"><div style="font-weight:700;margin-bottom:6px;">${product.name}</div><div style="margin-bottom:6px;">${product.sku}</div><svg id="bc"></svg></div>
+  <div class="label">
+    <div>${product.name}</div>
+    <div>${product.sku}</div>
+    <svg class="bc1"></svg>
+  </div>
+  <div class="label">
+    <div>${product.name}</div>
+    <div>${product.sku}</div>
+    <svg class="bc2"></svg>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
-  <script>window.addEventListener('load',function(){JsBarcode("#bc", ${JSON.stringify(product.sku)}, {format:"CODE128",displayValue:true,height:60}); setTimeout(()=>window.print(),150); window.onafterprint=function(){window.close()};});</script>
+  <script>
+    window.addEventListener('load', function(){
+      JsBarcode(".bc1", ${JSON.stringify(product.sku)}, {format:"CODE128", displayValue:true, height:40});
+      JsBarcode(".bc2", ${JSON.stringify(product.sku)}, {format:"CODE128", displayValue:true, height:40});
+      setTimeout(() => window.print(), 200);
+      window.onafterprint = function(){ window.close(); };
+    });
+  </script>
 </body>
 </html>`;
-    const w = window.open("", "_blank");
-    if (!w) return;
-    w.document.open();
-    w.document.write(html);
-    w.document.close();
-  };
+  
+  const w = window.open("", "_blank");
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+};
+
+
 
   // When a sale completes (from Cart), append it and prune >15 days
   const handleSaleComplete = (sale) => {
